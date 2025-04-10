@@ -9,6 +9,10 @@ const habitSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  description: {
+    type: String,
+    default: ''
+  },
   color: {
     type: String,
     default: '#6B7280' 
