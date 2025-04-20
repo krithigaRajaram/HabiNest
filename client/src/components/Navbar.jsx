@@ -1,12 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const Navbar = () => {
+const Navbar = ({ onAddHabitClick }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+    navigate('/logout');
   };
 
   return (
@@ -16,7 +15,13 @@ const Navbar = () => {
           <div className="flex items-center">
             <span className="text-xl font-bold">HabiNest</span>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={onAddHabitClick}
+              className="px-4 py-2 bg-white text-amber-800 hover:bg-amber-100 rounded-md text-sm font-medium transition-colors"
+            >
+              Add Habit
+            </button>
             <button
               onClick={handleLogout}
               className="px-4 py-2 bg-amber-700 hover:bg-amber-600 rounded-md text-sm font-medium transition-colors"
