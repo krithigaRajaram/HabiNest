@@ -47,8 +47,27 @@ const deleteHabit = async (req, res) => {
   }
 };
 
+const updateHabit = async (req, res) => {
+  try {
+    const updatedHabit = await Habit.findOneAndUpdate(
+      { _id: req.params.id, user: req.user },
+      { ...req.body }, 
+      { new: true }
+    );
+    if (!updatedHabit) {
+      return res.status(404).json({ msg: 'Habit not found' });
+    }
+    res.json(updatedHabit);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+};
+
+
 module.exports = {
   createHabit,
   getHabits,
-  deleteHabit
+  deleteHabit,
+  updateHabit
 };
