@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import InputField from '../components/InputField'; 
-import habit from '../assets/habit.png';
+import habit from '../assets/habits.png';
 
 const Login = () => {
   const [formData, setFormData] = useState({

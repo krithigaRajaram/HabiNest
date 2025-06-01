@@ -13,19 +13,12 @@ const habitSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  color: {
-    type: String,
-    default: '#6B7280' 
-  },
   frequency: {
     type: String,
-    enum: ['Daily', 'Weekly'],
+    enum: ['Daily', 'Weekly','Monthly'],
     default: 'Daily'
   },
-  icon: {
-    type: String,
-    default: '🔥' 
-  }
+ 
 }, { timestamps: true });
 
 module.exports = mongoose.model('Habit', habitSchema);
