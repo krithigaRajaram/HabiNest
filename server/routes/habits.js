@@ -4,11 +4,13 @@ const auth = require('../middleware/authMiddleware');
 const {
   createHabit,
   getHabits,
+  updateHabit,
   deleteHabit
 } = require('../controllers/habitController');
 
 router.post('/', auth, createHabit);
 router.get('/', auth, getHabits);
+router.patch('/:id', auth, updateHabit);
 router.delete('/:id', auth, deleteHabit);
 
 module.exports = router;
