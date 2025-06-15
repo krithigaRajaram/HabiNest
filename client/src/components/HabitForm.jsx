@@ -46,7 +46,7 @@ const HabitForm = ({ onHabitAdded }) => {
           className="w-68 h-auto object-contain"
         />
       </div>
-      <InputField label="Title" name="title" type="text" value={formData.title} onChange={handleChange} />
+      <InputField label="Title" name="title" type="text" value={formData.title} onChange={handleChange} required/>
       <InputField label="Description" name="description" type="text" value={formData.description} onChange={handleChange} />      
       <div className="mb-4">
         <label className="block text-sm font-medium text-amber-900 mb-1">Frequency</label>
