@@ -2,12 +2,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import HabitForm from '../components/HabitForm';
-import { TrashIcon } from '@heroicons/react/24/outline';
+import EditHabitModal from '../components/EditHabitModal';
+import { TrashIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { CheckIcon } from '@heroicons/react/24/solid';
 
 const Dashboard = () => {
   const [habits, setHabits] = useState([]);
   const [statusMap, setStatusMap] = useState({});
+  const [editHabit, setEditHabit] = useState(null);
+  const [editData, setEditData] = useState({ title: '', description: '' });
 
   const token = localStorage.getItem('token');
   const headers = { Authorization: `Bearer ${token}` };
@@ -92,7 +95,8 @@ const Dashboard = () => {
               return (
                 <div
                   key={habit._id}
-                  className="p-4 rounded-lg shadow-md bg-white border flex items-center justify-between">
+                  className="p-4 rounded-lg shadow-md bg-white border flex items-center justify-between"
+                >
                   <div className="flex items-center gap-4">
                     <label className="relative flex items-center cursor-pointer select-none">
                       <input
@@ -128,19 +132,59 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => handleDelete(habit._id)}
-                    className="text-black hover:scale-110 transition-transform duration-200 ml-4"
-                    title="Delete Habit"
-                  >
-                    <TrashIcon className="h-5 w-5" />
-                  </button>
+                  <div className="flex items-center">
+                    <button
+                      onClick={() => {
+                        setEditHabit(habit);
+                        setEditData({
+                          title: habit.title,
+                          description: habit.description,
+                        });
+                      }}
+                      className="text-black hover:scale-110 transition-transform duration-200 ml-1"
+                      title="Edit Habit"
+                    >
+                      <PencilSquareIcon className="h-5 w-5" />
+                    </button>
+
+                    <button
+                      onClick={() => handleDelete(habit._id)}
+                      className="text-black hover:scale-110 transition-transform duration-200 ml-4"
+                      title="Delete Habit"
+                    >
+                      <TrashIcon className="h-5 w-5" />
+                    </button>
+                  </div>
                 </div>
               );
             })}
           </div>
         </div>
       </div>
+
+      {editHabit && (
+        <EditHabitModal
+          editData={editData}
+          setEditData={setEditData}
+          onCancel={() => setEditHabit(null)}
+          onSave={async () => {
+            try {
+            console.log("Saved");
+              const res = await axios.put(
+                `http://localhost:5000/api/habits/${editHabit._id}`,
+                editData,
+                { headers }
+              );
+              setHabits((prev) =>
+                prev.map((h) => (h._id === editHabit._id ? res.data : h))
+              );
+              setEditHabit(null);
+            } catch (err) {
+              console.error('Error updating habit', err);
+            }
+          }}
+        />
+      )}
     </div>
   );
 };
