@@ -2,26 +2,28 @@ const Habit = require('../models/Habit');
 
 const createHabit = async (req, res) => {
   try {
-    const { title, frequency, description } = req.body;
-    
+    const { title, frequency, description, scheduledDay, scheduledDate } = req.body;
+
     if (!title) {
-        return res.status(400).json({ msg: 'Missing required fields' });
-      }
-      
-      if (!req.user) {
-        return res.status(401).json({ msg: 'Unauthorized' });
-      }
-      
+      return res.status(400).json({ msg: 'Missing required fields' });
+    }
+
+    if (!req.user) {
+      return res.status(401).json({ msg: 'Unauthorized' });
+    }
 
     const habit = await Habit.create({
       user: req.user,
       title,
       frequency,
-      description
+      description,
+      scheduledDay,
+      scheduledDate
     });
+
     res.status(201).json(habit);
-    
   } catch (err) {
+    console.error(err);
     res.status(500).json({ msg: 'Server error' });
   }
 };

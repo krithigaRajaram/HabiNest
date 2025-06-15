@@ -15,6 +15,9 @@ const Dashboard = () => {
   const token = localStorage.getItem('token');
   const headers = { Authorization: `Bearer ${token}` };
   const todayISO = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const today = new Date();
+  const todayWeekday = today.getDay(); 
+  const todayDate = today.getDate();   
 
   useEffect(() => {
     const fetchData = async () => {
@@ -66,7 +69,14 @@ const Dashboard = () => {
     }
   };
 
-  const sortedHabits = [...habits].sort(
+  const filteredHabits = habits.filter((habit) => {
+    if (habit.frequency === 'Daily') return true;
+    if (habit.frequency === 'Weekly') return habit.scheduledDay === todayWeekday;
+    if (habit.frequency === 'Monthly') return habit.scheduledDate === todayDate;
+    return false;
+  });
+
+  const sortedHabits = [...filteredHabits].sort(
     (a, b) => (statusMap[a._id] ? 1 : 0) - (statusMap[b._id] ? 1 : 0)
   );
 
@@ -75,7 +85,7 @@ const Dashboard = () => {
       <Navbar />
 
       <div className="flex flex-1 overflow-hidden">
-        <div className="w-full md:w-1/3">
+        <div className="w-full md:w-1/4">
           <HabitForm
             onHabitAdded={(newHabit) =>
               setHabits((prev) => [...prev, newHabit])
@@ -83,19 +93,26 @@ const Dashboard = () => {
           />
         </div>
 
-        <div className="w-full md:w-2/3 p-6 overflow-y-auto">
+        <div className="w-full md:w-3/4 p-6 overflow-y-auto">
           <h2 className="text-2xl font-bold mb-4 text-amber-900">
-            Your Habits
+            Your Habits for Today
           </h2>
 
           <div className="flex flex-col gap-4">
             {sortedHabits.map((habit) => {
               const completed = statusMap[habit._id];
 
+              const frequencyColor =
+                habit.frequency === 'Daily'
+                  ? 'bg-amber-50 border-amber-400'
+                  : habit.frequency === 'Weekly'
+                  ? 'bg-blue-50 border-blue-400'
+                  : 'bg-green-50 border-green-400';
+
               return (
                 <div
                   key={habit._id}
-                  className="p-4 rounded-lg shadow-md bg-white border flex items-center justify-between"
+                  className={`p-4 rounded-lg shadow-md border-l-4 flex items-center justify-between ${frequencyColor}`}
                 >
                   <div className="flex items-center gap-4">
                     <label className="relative flex items-center cursor-pointer select-none">
@@ -132,16 +149,27 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center">
+                  <div className="flex items-center gap-4">
+                    <span className="text-xs text-amber-700 italic whitespace-nowrap">
+                      {habit.frequency === 'Daily' && 'Occurs daily'}
+                      {habit.frequency === 'Weekly' &&
+                        `Every ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][habit.scheduledDay]}`}
+                      {habit.frequency === 'Monthly' &&
+                        `On ${habit.scheduledDate} each month`}
+                    </span>
+
                     <button
                       onClick={() => {
                         setEditHabit(habit);
                         setEditData({
                           title: habit.title,
                           description: habit.description,
+                          frequency: habit.frequency,
+                          scheduledDay: habit.scheduledDay ?? '',
+                          scheduledDate: habit.scheduledDate ?? ''
                         });
                       }}
-                      className="text-black hover:scale-110 transition-transform duration-200 ml-1"
+                      className="text-black hover:scale-110 transition-transform duration-200"
                       title="Edit Habit"
                     >
                       <PencilSquareIcon className="h-5 w-5" />
@@ -149,7 +177,7 @@ const Dashboard = () => {
 
                     <button
                       onClick={() => handleDelete(habit._id)}
-                      className="text-black hover:scale-110 transition-transform duration-200 ml-4"
+                      className="text-black hover:scale-110 transition-transform duration-200"
                       title="Delete Habit"
                     >
                       <TrashIcon className="h-5 w-5" />
@@ -167,12 +195,11 @@ const Dashboard = () => {
           editData={editData}
           setEditData={setEditData}
           onCancel={() => setEditHabit(null)}
-          onSave={async () => {
+          onSave={async (updated) => {
             try {
-            console.log("Saved");
               const res = await axios.put(
                 `http://localhost:5000/api/habits/${editHabit._id}`,
-                editData,
+                updated,
                 { headers }
               );
               setHabits((prev) =>
