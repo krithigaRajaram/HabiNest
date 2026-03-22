@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useGoogleLogin } from '@react-oauth/google';
+import { FaGoogle } from 'react-icons/fa';
 import InputField from '../components/InputField';
-import { register } from '../api/auth';
+import { register, googleLogin as googleLoginApi } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 import '../styles/auth.css';
 
@@ -26,6 +28,21 @@ const RegisterPage = () => {
     }
   };
 
+  const googleLogin = useGoogleLogin({
+    onSuccess: async ({ access_token }) => {
+      try {
+        const { data } = await googleLoginApi({ access_token });
+        login(data.token, data.user);
+        navigate('/dashboard');
+      } catch {
+        setError('Google sign-up failed');
+      }
+    },
+    onError: () => setError('Google sign-up failed'),
+    scope: 'openid email profile',
+    ux_mode: 'popup',
+  });
+
   return (
     <div className="auth-page">
       <div className="auth-card">
@@ -46,6 +63,13 @@ const RegisterPage = () => {
           {error && <p className="auth-error">{error}</p>}
           <button type="submit" className="auth-submit-btn">Create Account</button>
         </form>
+
+        <div className="auth-divider">or</div>
+
+        <button onClick={() => googleLogin()} className="auth-google-btn">
+          <FaGoogle size={16} />
+          Continue with Google
+        </button>
       </div>
     </div>
   );
