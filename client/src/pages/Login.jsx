@@ -1,14 +1,16 @@
-import React, { useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import InputField from "../components/InputField";
-import habit from "../assets/habits.png";
-import { useGoogleLogin } from "@react-oauth/google";
-import { FaGoogle } from "react-icons/fa";
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useGoogleLogin } from '@react-oauth/google';
+import { FaGoogle } from 'react-icons/fa';
+import InputField from '../components/InputField';
+import { login as loginApi, googleLogin as googleLoginApi } from '../api/auth';
+import { useAuth } from '../context/AuthContext';
+import '../styles/auth.css';
 
 const Login = () => {
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = ({ target: { name, value } }) =>
@@ -16,91 +18,57 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError('');
     try {
-      const { data } = await axios.post("http://localhost:5000/api/auth/login", formData);
-      localStorage.setItem("token", data.token);
-      navigate("/dashboard");
-    } catch {
-      setError("Login failed. Please check your credentials.");
+      const { data } = await loginApi(formData);
+      login(data.token, data.user);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.msg || 'Login failed. Please check your credentials.');
     }
   };
 
   const googleLogin = useGoogleLogin({
     onSuccess: async ({ access_token }) => {
       try {
-        const { data } = await axios.post("http://localhost:5000/api/auth/google-login", {
-          access_token,
-        });
-        localStorage.setItem("token", data.token);
-        navigate("/dashboard");
+        const { data } = await googleLoginApi({ access_token });
+        login(data.token, data.user);
+        navigate('/dashboard');
       } catch {
-        setError("Google login failed");
+        setError('Google login failed');
       }
     },
-    onError: () => setError("Google login failed"),
-    scope: "openid email profile",
-    ux_mode: "popup",
+    onError: () => setError('Google login failed'),
+    scope: 'openid email profile',
+    ux_mode: 'popup',
   });
 
   return (
-    <div className="flex flex-col h-screen bg-amber-50">
-      <div className="text-center pt-16 pb-8">
-        <h2 className="text-4xl font-bold text-amber-900 mb-4">Login</h2>
-        <p className="text-sm text-amber-800">
-          Don’t have an account?{" "}
-          <a href="/register" className="text-amber-950 underline font-medium">
-            Sign Up
-          </a>
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-logo">
+          <div className="auth-logo-text">HabiNest</div>
+          <div className="auth-logo-sub">Build habits. Track progress.</div>
+        </div>
+
+        <h2 className="auth-title">Welcome back</h2>
+        <p className="auth-subtitle">
+          Don't have an account? <Link to="/register">Sign up</Link>
         </p>
-      </div>
 
-      <div className="flex flex-1">
-        <div className="w-1/2 flex justify-end items-center p-6">
-          <img src={habit} alt="Habit" className="w-full max-w-xl object-contain" />
-        </div>
+        <form onSubmit={handleLogin} className="auth-form">
+          <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} />
+          <InputField label="Password" name="password" type="password" value={formData.password} onChange={handleChange} />
+          {error && <p className="auth-error">{error}</p>}
+          <button type="submit" className="auth-submit-btn">Login</button>
+        </form>
 
-        <div className="flex justify-center">
-          <div className="w-px bg-amber-800 h-3/5 self-center" />
-        </div>
+        <div className="auth-divider">or</div>
 
-        <div className="w-1/2 flex items-center ml-12">
-          <div className="max-w-md w-full">
-            <form onSubmit={handleLogin} className="space-y-2">
-              <div className="space-y-4">
-                <InputField
-                  label="Email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-                <InputField
-                  label="Password"
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-              </div>
-              {error && <p className="text-red-500 text-center">{error}</p>}
-              <button
-                type="submit"
-                className="w-3/4 py-2 mt-4 bg-amber-800 text-white rounded-md font-medium hover:bg-amber-700 transition"
-              >
-                Login
-              </button>
-            </form>
-
-            <button
-              onClick={() => googleLogin()}
-              className="w-3/4 mt-3 flex items-center justify-center gap-3 py-2 border rounded-md shadow hover:shadow-md
-                        bg-white text-amber-900 hover:bg-amber-50 transition">
-              <FaGoogle className="h-5 w-5" />
-              Sign in with Google
-            </button>
-
-          </div>
-        </div>
+        <button onClick={() => googleLogin()} className="auth-google-btn">
+          <FaGoogle size={16} />
+          Continue with Google
+        </button>
       </div>
     </div>
   );

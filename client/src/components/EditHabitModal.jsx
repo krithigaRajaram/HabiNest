@@ -1,79 +1,58 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import '../styles/modal.css';
 
-const EditHabitModal = ({ editData, setEditData, onSave, onCancel }) => {
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+const EditHabitModal = ({ editData, onSave, onCancel }) => {
   const [local, setLocal] = useState(editData);
 
   useEffect(() => setLocal(editData), [editData]);
 
   const handleChange = (e) =>
-    setLocal({ ...local, [e.target.name]: e.target.value });
-
-  const handleSubmit = () => onSave(local);
+    setLocal((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-md rounded-lg p-6 shadow-lg">
-        <h2 className="text-xl font-semibold mb-4 text-amber-900">Edit Habit</h2>
+    <div className="modal-overlay">
+      <div className="modal-box">
+        <h2 className="modal-title">Edit Habit</h2>
 
         <input
           type="text"
           name="title"
           value={local.title}
           onChange={handleChange}
-          className="border w-full p-2 rounded mb-3"
           placeholder="Title"
+          className="modal-input"
         />
 
         <textarea
           name="description"
           value={local.description}
           onChange={handleChange}
-          className="border w-full p-2 rounded mb-4"
           placeholder="Description"
+          className="modal-textarea"
         />
 
-        <label className="block text-sm font-medium text-amber-900 mb-1">
-          Frequency
-        </label>
-        <select
-          name="frequency"
-          value={local.frequency}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border rounded-md mb-4 bg-amber-50"
-        >
+        <label className="modal-label">Frequency</label>
+        <select name="frequency" value={local.frequency} onChange={handleChange} className="modal-select">
           <option value="Daily">Daily</option>
           <option value="Weekly">Weekly</option>
           <option value="Monthly">Monthly</option>
         </select>
 
         {local.frequency === 'Weekly' && (
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-amber-900 mb-1">
-              Day of the Week
-            </label>
-            <select
-              name="scheduledDay"
-              value={local.scheduledDay}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md bg-amber-50"
-            >
+          <>
+            <label className="modal-label">Day of the Week</label>
+            <select name="scheduledDay" value={local.scheduledDay} onChange={handleChange} className="modal-select">
               <option value="">-- Select a Day --</option>
-              <option value="0">Sunday</option>
-              <option value="1">Monday</option>
-              <option value="2">Tuesday</option>
-              <option value="3">Wednesday</option>
-              <option value="4">Thursday</option>
-              <option value="5">Friday</option>
-              <option value="6">Saturday</option>
+              {DAYS.map((day, i) => <option key={i} value={i}>{day}</option>)}
             </select>
-          </div>
+          </>
         )}
 
         {local.frequency === 'Monthly' && (
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-amber-900 mb-1">
-              Day of the Month
-            </label>
+          <>
+            <label className="modal-label">Day of the Month</label>
             <input
               type="number"
               name="scheduledDate"
@@ -81,21 +60,14 @@ const EditHabitModal = ({ editData, setEditData, onSave, onCancel }) => {
               max="31"
               value={local.scheduledDate}
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md bg-amber-50"
+              className="modal-input"
             />
-          </div>
+          </>
         )}
 
-        <div className="flex justify-end gap-2">
-          <button onClick={onCancel} className="px-4 py-2 rounded bg-gray-300">
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="px-4 py-2 rounded bg-amber-600 text-white"
-          >
-            Save
-          </button>
+        <div className="modal-actions">
+          <button onClick={onCancel} className="modal-cancel-btn">Cancel</button>
+          <button onClick={() => onSave(local)} className="modal-save-btn">Save</button>
         </div>
       </div>
     </div>
