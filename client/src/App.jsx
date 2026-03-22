@@ -1,30 +1,30 @@
-import './App.css';
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import RegisterPage from './pages/RegisterPage';
-import Dashboard from './pages/Dashboard'; 
-import Login from './pages/Login';
-import Logout from './components/Logout';
-import ProtectedRoutes from './utils/ProtectedRoutes';
-
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoutes from './utils/ProtectedRoutes';
+import Login from './pages/Login';
+import RegisterPage from './pages/RegisterPage';
+import Dashboard from './pages/Dashboard';
+
 function App() {
   return (
-    <Router>
-      <>
+    <AuthProvider>
+      <Router>
         <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<RegisterPage />} /> 
+          <Route path="/register" element={<RegisterPage />} />
           <Route element={<ProtectedRoutes />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/logout" element={<Logout />} />
           </Route>
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
         <ToastContainer position="top-right" autoClose={3000} />
-      </>
-    </Router>
+      </Router>
+    </AuthProvider>
   );
 }
 

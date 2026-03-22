@@ -1,78 +1,89 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import axios from 'axios';
 import Navbar from '../components/Navbar';
 import HabitForm from '../components/HabitForm';
 import EditHabitModal from '../components/EditHabitModal';
 import { TrashIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
-import { CheckIcon } from '@heroicons/react/24/solid';
+import { CheckIcon, FireIcon } from '@heroicons/react/24/solid';
+import { getHabits, updateHabit, deleteHabit } from '../api/habits';
+import { getStatusByDate, updateHabitStatus, getStreak } from '../api/habitStatus';
+import '../styles/dashboard.css';
+
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 const Dashboard = () => {
   const [habits, setHabits] = useState([]);
   const [statusMap, setStatusMap] = useState({});
+  const [streakMap, setStreakMap] = useState({});
   const [editHabit, setEditHabit] = useState(null);
-  const [editData, setEditData] = useState({ title: '', description: '' });
+  const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem('token');
-  const headers = { Authorization: `Bearer ${token}` };
   const todayISO = useMemo(() => new Date().toISOString().split('T')[0], []);
-  const today = new Date();
-  const todayWeekday = today.getDay(); 
-  const todayDate = today.getDate();   
+  const todayWeekday = new Date().getDay();
+  const todayDate = new Date().getDate();
+  const todayLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [habitRes, statusRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/habits', { headers }),
-          axios.get(`http://localhost:5000/api/habit-status/${todayISO}`, {
-            headers,
-          }),
+          getHabits(), getStatusByDate(todayISO),
         ]);
-
         const map = {};
-        statusRes.data.forEach((s) => {
-          map[s.habit] = s.completed;
-        });
-
+        statusRes.data.forEach((s) => { map[s.habit] = s.completed; });
         setHabits(habitRes.data);
         setStatusMap(map);
+
+        const streakEntries = await Promise.all(
+          habitRes.data.map(async (h) => {
+            const { data } = await getStreak(h._id);
+            return [h._id, data.currentStreak];
+          })
+        );
+        setStreakMap(Object.fromEntries(streakEntries));
       } catch (err) {
-        console.error('Error loading data', err);
+        console.error('Error loading dashboard:', err);
+      } finally {
+        setLoading(false);
       }
     };
-
     fetchData();
   }, [todayISO]);
 
   const handleToggleComplete = async (habitId) => {
     const completed = !statusMap[habitId];
-
     try {
-      await axios.post(
-        'http://localhost:5000/api/habit-status',
-        { habitId, date: todayISO, completed },
-        { headers }
-      );
-
+      await updateHabitStatus({ habitId, date: todayISO, completed });
       setStatusMap((prev) => ({ ...prev, [habitId]: completed }));
+      const { data } = await getStreak(habitId);
+      setStreakMap((prev) => ({ ...prev, [habitId]: data.currentStreak }));
     } catch (err) {
-      console.error('Error updating status', err);
+      console.error('Error toggling status:', err);
     }
   };
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/habits/${id}`, { headers });
+      await deleteHabit(id);
       setHabits((prev) => prev.filter((h) => h._id !== id));
     } catch (err) {
       console.error('Error deleting habit:', err);
     }
   };
 
-  const filteredHabits = habits.filter((habit) => {
-    if (habit.frequency === 'Daily') return true;
-    if (habit.frequency === 'Weekly') return habit.scheduledDay === todayWeekday;
-    if (habit.frequency === 'Monthly') return habit.scheduledDate === todayDate;
+  const handleSaveEdit = async (updated) => {
+    try {
+      const { data } = await updateHabit(editHabit._id, updated);
+      setHabits((prev) => prev.map((h) => (h._id === editHabit._id ? data : h)));
+      setEditHabit(null);
+    } catch (err) {
+      console.error('Error updating habit:', err);
+    }
+  };
+
+  const filteredHabits = habits.filter((h) => {
+    if (h.frequency === 'Daily') return true;
+    if (h.frequency === 'Weekly') return h.scheduledDay === todayWeekday;
+    if (h.frequency === 'Monthly') return h.scheduledDate === todayDate;
     return false;
   });
 
@@ -80,136 +91,110 @@ const Dashboard = () => {
     (a, b) => (statusMap[a._id] ? 1 : 0) - (statusMap[b._id] ? 1 : 0)
   );
 
+  const completedCount = sortedHabits.filter((h) => statusMap[h._id]).length;
+  const progressPct = sortedHabits.length ? (completedCount / sortedHabits.length) * 100 : 0;
+
+  const freqClass = (f) => f === 'Daily' ? 'daily' : f === 'Weekly' ? 'weekly' : 'monthly';
+
+  const freqLabel = (h) => {
+    if (h.frequency === 'Daily') return 'Daily';
+    if (h.frequency === 'Weekly') return `Every ${DAYS[h.scheduledDay]}`;
+    if (h.frequency === 'Monthly') return `Day ${h.scheduledDate}`;
+  };
+
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-amber-50">
+    <div className="dashboard-page">
       <Navbar />
+      <div className="dashboard-body">
+        <HabitForm onHabitAdded={(h) => setHabits((prev) => [h, ...prev])} />
 
-      <div className="flex flex-1 overflow-hidden">
-        <div className="w-full md:w-1/4">
-          <HabitForm
-            onHabitAdded={(newHabit) =>
-              setHabits((prev) => [...prev, newHabit])
-            }
-          />
-        </div>
+        <div className="habit-list-panel">
+          <div className="habit-list-header">
+            <h2 className="habit-list-title">Today's Habits</h2>
+            <span className="habit-list-date">{todayLabel}</span>
+          </div>
 
-        <div className="w-full md:w-3/4 p-6 overflow-y-auto">
-          <h2 className="text-2xl font-bold mb-4 text-amber-900">
-            Your Habits for Today
-          </h2>
+          {/* Progress bar */}
+          {!loading && sortedHabits.length > 0 && (
+            <div className="progress-bar-wrapper">
+              <div className="progress-bar-track">
+                <div className="progress-bar-fill" style={{ width: `${progressPct}%` }} />
+              </div>
+              <span className="progress-label">
+                <span>{completedCount}</span> / {sortedHabits.length} done
+              </span>
+            </div>
+          )}
 
-          <div className="flex flex-col gap-4">
-            {sortedHabits.map((habit) => {
-              const completed = statusMap[habit._id];
+          {loading ? (
+            <div className="loading-spinner">Loading habits...</div>
+          ) : sortedHabits.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-state-icon">✦</div>
+              <p>No habits scheduled for today.</p>
+              <p>Add one from the sidebar to get started.</p>
+            </div>
+          ) : (
+            <div className="habit-list">
+              {sortedHabits.map((habit) => {
+                const completed = !!statusMap[habit._id];
+                const streak = streakMap[habit._id] || 0;
 
-              const frequencyColor =
-                habit.frequency === 'Daily'
-                  ? 'bg-amber-50 border-amber-400'
-                  : habit.frequency === 'Weekly'
-                  ? 'bg-blue-50 border-blue-400'
-                  : 'bg-green-50 border-green-400';
+                return (
+                  <div key={habit._id} className={`habit-card ${freqClass(habit.frequency)} ${completed ? 'is-completed' : ''}`}>
+                    <div className="habit-card-left">
+                      <label className="habit-checkbox-wrapper">
+                        <input
+                          type="checkbox"
+                          checked={completed}
+                          onChange={() => handleToggleComplete(habit._id)}
+                          className="habit-checkbox"
+                        />
+                        <CheckIcon className="habit-checkbox-icon" />
+                      </label>
 
-              return (
-                <div
-                  key={habit._id}
-                  className={`p-4 rounded-lg shadow-md border-l-4 flex items-center justify-between ${frequencyColor}`}
-                >
-                  <div className="flex items-center gap-4">
-                    <label className="relative flex items-center cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={!!completed}
-                        onChange={() => handleToggleComplete(habit._id)}
-                        className="peer appearance-none h-6 w-6 rounded-full border-2 border-amber-600 checked:bg-amber-600 transition-colors duration-200"
-                      />
-                      <CheckIcon
-                        className="absolute h-4 w-4 text-white pointer-events-none left-1 top-1 opacity-0 peer-checked:opacity-100 transition-opacity duration-200"
-                      />
-                    </label>
+                      <div>
+                        <h3 className={`habit-title ${completed ? 'completed' : ''}`}>{habit.title}</h3>
+                        {habit.description && (
+                          <p className={`habit-description ${completed ? 'completed' : ''}`}>{habit.description}</p>
+                        )}
+                        {streak > 0 && (
+                          <div className="streak-badge">
+                            <FireIcon style={{ width: '0.8rem', height: '0.8rem' }} />
+                            {streak} day streak
+                          </div>
+                        )}
+                      </div>
+                    </div>
 
-                    <div>
-                      <h3
-                        className={`text-xl font-semibold ${
-                          completed
-                            ? 'line-through text-gray-400'
-                            : 'text-amber-900'
-                        }`}
-                      >
-                        {habit.title}
-                      </h3>
-                      <p
-                        className={`text-sm ${
-                          completed
-                            ? 'text-gray-400 line-through'
-                            : 'text-gray-600'
-                        }`}
-                      >
-                        {habit.description}
-                      </p>
+                    <div className="habit-card-right">
+                      <span className="habit-frequency-label">{freqLabel(habit)}</span>
+                      <button onClick={() => setEditHabit(habit)} className="habit-action-btn" title="Edit">
+                        <PencilSquareIcon style={{ width: '1rem', height: '1rem' }} />
+                      </button>
+                      <button onClick={() => handleDelete(habit._id)} className="habit-action-btn delete" title="Delete">
+                        <TrashIcon style={{ width: '1rem', height: '1rem' }} />
+                      </button>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-4">
-                    <span className="text-xs text-amber-700 italic whitespace-nowrap">
-                      {habit.frequency === 'Daily' && 'Occurs daily'}
-                      {habit.frequency === 'Weekly' &&
-                        `Every ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][habit.scheduledDay]}`}
-                      {habit.frequency === 'Monthly' &&
-                        `On ${habit.scheduledDate} each month`}
-                    </span>
-
-                    <button
-                      onClick={() => {
-                        setEditHabit(habit);
-                        setEditData({
-                          title: habit.title,
-                          description: habit.description,
-                          frequency: habit.frequency,
-                          scheduledDay: habit.scheduledDay ?? '',
-                          scheduledDate: habit.scheduledDate ?? ''
-                        });
-                      }}
-                      className="text-black hover:scale-110 transition-transform duration-200"
-                      title="Edit Habit"
-                    >
-                      <PencilSquareIcon className="h-5 w-5" />
-                    </button>
-
-                    <button
-                      onClick={() => handleDelete(habit._id)}
-                      className="text-black hover:scale-110 transition-transform duration-200"
-                      title="Delete Habit"
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
       {editHabit && (
         <EditHabitModal
-          editData={editData}
-          setEditData={setEditData}
-          onCancel={() => setEditHabit(null)}
-          onSave={async (updated) => {
-            try {
-              const res = await axios.put(
-                `http://localhost:5000/api/habits/${editHabit._id}`,
-                updated,
-                { headers }
-              );
-              setHabits((prev) =>
-                prev.map((h) => (h._id === editHabit._id ? res.data : h))
-              );
-              setEditHabit(null);
-            } catch (err) {
-              console.error('Error updating habit', err);
-            }
+          editData={{
+            title: editHabit.title,
+            description: editHabit.description,
+            frequency: editHabit.frequency,
+            scheduledDay: editHabit.scheduledDay ?? '',
+            scheduledDate: editHabit.scheduledDate ?? '',
           }}
+          onSave={handleSaveEdit}
+          onCancel={() => setEditHabit(null)}
         />
       )}
     </div>

@@ -1,8 +1,13 @@
-import { Outlet, Navigate } from "react-router-dom";
+import React from 'react';
+import { Outlet, Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
 const ProtectedRoutes = () => {
-    const token = localStorage.getItem("token");
-    const isAuthenticated = token && token.trim().length > 0;
-    return isAuthenticated ? <Outlet/> : <Navigate to="/login"/>
-}
- 
+  const { user, loading } = useAuth();
+
+  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>;
+
+  return user ? <Outlet /> : <Navigate to="/login" replace />;
+};
+
 export default ProtectedRoutes;

@@ -1,29 +1,21 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import '../styles/navbar.css';
 
 const Navbar = () => {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    navigate('/logout');
-  };
+  const { user, logout } = useAuth();
 
   return (
-    <nav className="bg-amber-800 text-white shadow-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <span className="text-xl font-bold">HabiNest</span>
-          </div>
-          <div className="flex items-center space-x-4">
-            
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-amber-700 hover:bg-amber-600 rounded-md text-sm font-medium transition-colors"
-            >
-              Logout
-            </button>
-          </div>
+    <nav className="navbar">
+      <div className="navbar-inner">
+        <span className="navbar-brand">HabiNest</span>
+        <div className="navbar-right">
+          {user && (
+            <span className="navbar-username">
+              Hey, <span>{user.username}</span>
+            </span>
+          )}
+          <button className="navbar-logout-btn" onClick={logout}>Logout</button>
         </div>
       </div>
     </nav>
