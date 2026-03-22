@@ -5,17 +5,19 @@ const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
-    minlength: 3
+    trim: true,
+    minlength: 3,
   },
   email: {
     type: String,
     required: true,
     unique: true,
-    lowercase: true
+    lowercase: true,
+    trim: true,
   },
-    password: {
+  password: {
     type: String,
-    minlength: 8       
+    minlength: 8,
   },
   authType: {
     type: String,
@@ -30,5 +32,9 @@ userSchema.pre('save', async function(next) {
    this.password = await bcrypt.hash(this.password, 10);
    next();
  });
+
+userSchema.methods.comparePassword = function(candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
 
 module.exports = mongoose.model('User', userSchema);
