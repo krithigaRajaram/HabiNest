@@ -1,58 +1,79 @@
 /* ── Navbar ── */
 .navbar {
-  background: var(--bg-surface);
-  border-bottom: 1px solid var(--border);
+  background: var(--app-surface);
+  border-bottom: 1px solid var(--app-border);
   position: sticky;
   top: 0;
   z-index: 40;
+  flex-shrink: 0;
 }
 
 .navbar-inner {
-  max-width: 100%;
-  padding: 0 1.5rem;
+  padding: 0 1.75rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 3.75rem;
+  height: 3.5rem;
 }
 
 .navbar-brand {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  color: var(--primary);
-  letter-spacing: -0.01em;
+  color: var(--app-text);
+  letter-spacing: -0.02em;
 }
 
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .navbar-username {
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  font-size: 0.82rem;
+  color: var(--app-text-muted);
+  margin-right: 0.25rem;
 }
 
 .navbar-username span {
-  color: var(--text);
+  color: var(--app-text);
   font-weight: 500;
+}
+
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--app-border);
+  background: transparent;
+  color: var(--app-text-muted);
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.theme-toggle-btn:hover {
+  color: var(--app-text);
+  background: var(--app-card);
+  border-color: var(--app-text-muted);
 }
 
 .navbar-logout-btn {
-  padding: 0.4rem 1rem;
+  padding: 0.35rem 0.875rem;
   background: transparent;
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-size: 0.85rem;
+  color: var(--app-text-muted);
+  border: 1px solid var(--app-border);
+  border-radius: 0.5rem;
+  font-size: 0.82rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
 }
 
 .navbar-logout-btn:hover {
-  color: var(--danger);
-  border-color: var(--danger);
-  background: rgba(239,68,68,0.08);
+  color: var(--app-danger);
+  border-color: var(--app-danger);
+  background: rgba(239, 68, 68, 0.08);
 }

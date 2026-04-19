@@ -2,29 +2,35 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
 import { FaGoogle } from 'react-icons/fa';
-import InputField from '../components/InputField';
+import { Button } from '@/components/ui/button';
+import { Input }  from '@/components/ui/input';
+import { Label }  from '@/components/ui/label';
 import { login as loginApi, googleLogin as googleLoginApi } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 import '../styles/auth.css';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const [error, setError]       = useState('');
+  const [loading, setLoading]   = useState(false);
+  const { login }               = useAuth();
+  const navigate                = useNavigate();
 
   const handleChange = ({ target: { name, value } }) =>
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((p) => ({ ...p, [name]: value }));
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
       const { data } = await loginApi(formData);
       login(data.token, data.user);
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.msg || 'Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -46,6 +52,7 @@ const Login = () => {
   return (
     <div className="auth-page">
       <div className="auth-card">
+
         <div className="auth-logo">
           <div className="auth-logo-text">HabiNest</div>
           <div className="auth-logo-sub">Build habits. Track progress.</div>
@@ -57,18 +64,51 @@ const Login = () => {
         </p>
 
         <form onSubmit={handleLogin} className="auth-form">
-          <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} />
-          <InputField label="Password" name="password" type="password" value={formData.password} onChange={handleChange} />
+          <div className="auth-field">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+
+          <div className="auth-field">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="••••••••"
+              required
+            />
+          </div>
+
           {error && <p className="auth-error">{error}</p>}
-          <button type="submit" className="auth-submit-btn">Login</button>
+
+          <Button type="submit" className="auth-submit" disabled={loading}>
+            {loading ? 'Logging in…' : 'Login'}
+          </Button>
         </form>
 
         <div className="auth-divider">or</div>
 
-        <button onClick={() => googleLogin()} className="auth-google-btn">
-          <FaGoogle size={16} />
+        <Button
+          type="button"
+          variant="outline"
+          className="auth-google-btn"
+          onClick={() => googleLogin()}
+        >
+          <FaGoogle size={14} />
           Continue with Google
-        </button>
+        </Button>
+
       </div>
     </div>
   );
