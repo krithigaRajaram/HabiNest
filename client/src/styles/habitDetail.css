@@ -1,0 +1,224 @@
+/* ── Habit Detail Page ── */
+.hd-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--app-bg);
+}
+
+.hd-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem 0;
+}
+
+.hd-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.hd-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+}
+
+/* ── Back Button ── */
+.hd-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  background: transparent;
+  border: 1px solid var(--app-border);
+  border-radius: 0.5rem;
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 1.75rem;
+}
+
+.hd-back-btn:hover {
+  color: var(--app-text);
+  background: var(--app-card);
+  border-color: var(--app-text-muted);
+}
+
+/* ── Header ── */
+.hd-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.hd-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--app-text);
+  letter-spacing: -0.03em;
+  margin-bottom: 0.25rem;
+}
+
+.hd-description {
+  font-size: 0.9rem;
+  color: var(--app-text-muted);
+  margin-top: 0.375rem;
+}
+
+.hd-freq-badge {
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  padding: 0.25rem 0.75rem !important;
+  border-radius: 999px !important;
+}
+
+.hd-freq-badge.freq-daily   { color: #93c5fd !important; border-color: rgba(59,130,246,0.25)  !important; background: rgba(59,130,246,0.08)  !important; }
+.hd-freq-badge.freq-weekly  { color: #c4b5fd !important; border-color: rgba(139,92,246,0.25)  !important; background: rgba(139,92,246,0.08)  !important; }
+.hd-freq-badge.freq-monthly { color: #6ee7b7 !important; border-color: rgba(16,185,129,0.25)  !important; background: rgba(16,185,129,0.08)  !important; }
+
+/* ── Stats Cards ── */
+.hd-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.hd-stat-card {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.hd-stat-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.625rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.hd-stat-icon.streak     { background: rgba(245,158,11,0.15);  color: #fbbf24; }
+.hd-stat-icon.completed  { background: rgba(16,185,129,0.15);  color: #10b981; font-size: 1.125rem; }
+.hd-stat-icon.rate       { background: rgba(59,130,246,0.15);  color: #3b82f6; font-size: 0.75rem; }
+
+.hd-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--app-text);
+  line-height: 1;
+}
+
+.hd-stat-label {
+  font-size: 0.8rem;
+  color: var(--app-text-muted);
+  margin-top: 0.25rem;
+}
+
+/* ── Calendar Section ── */
+.hd-calendar-section {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 0.75rem;
+  padding: 1.75rem;
+}
+
+.hd-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--app-text);
+  margin-bottom: 1.5rem;
+}
+
+/* ── GitHub-style Calendar ── */
+.hd-calendar {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 0.5rem;
+  overflow-x: auto;
+}
+
+/* Month labels (top row) */
+.hd-month-labels {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  gap: 1px;
+}
+
+.hd-month-label {
+  flex: 1;
+  min-width: 10px;
+  font-size: 0.7rem;
+  color: var(--app-text-muted);
+  text-align: left;
+}
+
+/* Day labels (left column) */
+.hd-day-labels {
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 0.5rem;
+}
+
+.hd-day-label {
+  height: 10px;
+  font-size: 0.65rem;
+  color: var(--app-text-muted);
+  display: flex;
+  align-items: center;
+}
+
+/* Grid of weeks */
+.hd-grid {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  gap: 2px;
+}
+
+.hd-week {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hd-cell {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--app-border);
+  transition: all 0.15s;
+}
+
+.hd-cell.completed {
+  background: var(--app-primary);
+}
+
+.hd-cell:hover {
+  outline: 1px solid var(--app-text-muted);
+  transform: scale(1.3);
+  z-index: 10;
+}

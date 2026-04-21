@@ -107,4 +107,36 @@ const getStreak = async (req, res) => {
   }
 };
 
-module.exports = { updateHabitStatus, getStatusByDate, getStreak };
+// GET /api/habit-status/habit/:habitId?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+const getHabitHistory = async (req, res) => {
+  try {
+    const { habitId } = req.params;
+    const { startDate, endDate } = req.query;
+
+    // Verify the habit belongs to this user
+    const habit = await Habit.findOne({ _id: habitId, user: req.user });
+    if (!habit) return res.status(404).json({ msg: 'Habit not found' });
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({ msg: 'startDate and endDate are required' });
+    }
+
+    const start = new Date(`${startDate}T00:00:00.000Z`);
+    const end = new Date(`${endDate}T23:59:59.999Z`);
+
+    const statuses = await HabitStatus.find({
+      habit: habitId,
+      date: { $gte: start, $lte: end }
+    })
+      .select('date completed')
+      .sort({ date: 1 })
+      .lean();
+
+    res.json(statuses);
+  } catch (err) {
+    console.error('getHabitHistory error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+};
+
+module.exports = { updateHabitStatus, getStatusByDate, getStreak, getHabitHistory };

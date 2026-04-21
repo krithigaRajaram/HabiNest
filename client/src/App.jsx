@@ -8,6 +8,7 @@ import ProtectedRoutes from './utils/ProtectedRoutes';
 import Login from './pages/Login';
 import RegisterPage from './pages/RegisterPage';
 import Dashboard from './pages/Dashboard';
+import HabitDetail from './pages/HabitDetail';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route element={<ProtectedRoutes />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/habit/:id" element={<HabitDetail />} />
           </Route>
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>

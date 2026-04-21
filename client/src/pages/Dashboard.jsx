@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import HabitForm from '../components/HabitForm';
 import EditHabitModal from '../components/EditHabitModal';
@@ -14,6 +15,7 @@ const MONTHS = ['January','February','March','April','May','June',
                 'July','August','September','October','November','December'];
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [habits, setHabits]             = useState([]);
   const [statusMap, setStatusMap]       = useState({});
   const [streakMap, setStreakMap]       = useState({});
@@ -147,6 +149,7 @@ const Dashboard = () => {
                     <div
                       key={habit._id}
                       className={`habit-card freq-${freqClass(habit.frequency)} ${completed ? 'is-completed' : ''}`}
+                      onClick={() => navigate(`/habit/${habit._id}`)}
                     >
                       <div className="habit-card-left">
                         <label className="habit-checkbox-wrapper">
