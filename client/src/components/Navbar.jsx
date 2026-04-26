@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../styles/navbar.css';
 
@@ -17,6 +18,8 @@ const MoonIcon = () => (
 
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [theme, setTheme] = useState(
     () => localStorage.getItem('theme') || 'dark'
   );
@@ -28,10 +31,27 @@ const Navbar = () => {
 
   const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
 
+  const isActive = (path) => location.pathname === path;
+
   return (
     <nav className="navbar">
       <div className="navbar-inner">
         <span className="navbar-brand">HabiNest</span>
+
+        <div className="navbar-center">
+          <button
+            className={`navbar-nav-btn ${isActive('/dashboard') ? 'active' : ''}`}
+            onClick={() => navigate('/dashboard')}
+          >
+            Dashboard
+          </button>
+          <button
+            className={`navbar-nav-btn ${isActive('/reports') ? 'active' : ''}`}
+            onClick={() => navigate('/reports')}
+          >
+            Reports
+          </button>
+        </div>
 
         <div className="navbar-right">
           {user && (

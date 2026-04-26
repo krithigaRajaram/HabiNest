@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import RegisterPage from './pages/RegisterPage';
 import Dashboard from './pages/Dashboard';
 import HabitDetail from './pages/HabitDetail';
+import Reports from './pages/Reports';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route element={<ProtectedRoutes />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/habit/:id" element={<HabitDetail />} />
+            <Route path="/reports" element={<Reports />} />
           </Route>
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>

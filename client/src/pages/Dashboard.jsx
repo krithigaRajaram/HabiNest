@@ -152,7 +152,7 @@ const Dashboard = () => {
                       onClick={() => navigate(`/habit/${habit._id}`)}
                     >
                       <div className="habit-card-left">
-                        <label className="habit-checkbox-wrapper">
+                        <label className="habit-checkbox-wrapper" onClick={(e) => e.stopPropagation()}>
                           <input
                             type="checkbox"
                             checked={completed}

@@ -9,3 +9,9 @@ export const getHabitHistory = (habitId, startDate, endDate) =>
   axiosInstance.get(`/habit-status/habit/${habitId}`, {
     params: { startDate, endDate }
   });
+
+// Fetch reports overview data for all user habits
+export const getReportsOverview = (startDate, endDate) =>
+  axiosInstance.get('/habit-status/reports/overview', {
+    params: { startDate, endDate }
+  });

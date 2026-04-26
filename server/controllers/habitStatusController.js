@@ -139,4 +139,48 @@ const getHabitHistory = async (req, res) => {
   }
 };
 
-module.exports = { updateHabitStatus, getStatusByDate, getStreak, getHabitHistory };
+// GET /api/habit-status/reports/overview?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+const getReportsOverview = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({ msg: 'startDate and endDate are required' });
+    }
+
+    const start = new Date(`${startDate}T00:00:00.000Z`);
+    const end = new Date(`${endDate}T23:59:59.999Z`);
+
+    // Get all user's habits
+    const habitIds = await Habit.find({ user: req.user }).distinct('_id');
+
+    if (!habitIds.length) {
+      return res.json({ statuses: [], totalHabits: 0 });
+    }
+
+    // Get all statuses in date range
+    const statuses = await HabitStatus.find({
+      habit: { $in: habitIds },
+      date: { $gte: start, $lte: end }
+    })
+      .select('habit date completed')
+      .sort({ date: 1 })
+      .lean();
+
+    res.json({
+      statuses,
+      totalHabits: habitIds.length
+    });
+  } catch (err) {
+    console.error('getReportsOverview error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+};
+
+module.exports = { 
+  updateHabitStatus, 
+  getStatusByDate, 
+  getStreak, 
+  getHabitHistory,
+  getReportsOverview 
+};

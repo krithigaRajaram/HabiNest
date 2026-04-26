@@ -1,0 +1,205 @@
+/* ── Reports Page ── */
+.rp-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--app-bg);
+}
+
+.rp-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem 0;
+}
+
+.rp-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.rp-loading,
+.rp-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  gap: 0.5rem;
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* ── Title ── */
+.rp-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--app-text);
+  letter-spacing: -0.03em;
+  margin-bottom: 2rem;
+}
+
+/* ── Stats Cards ── */
+.rp-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.rp-stat-card {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.rp-stat-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.625rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rp-stat-icon.habits { background: rgba(139,92,246,0.15);  color: #a78bfa; }
+.rp-stat-icon.rate   { background: rgba(16,185,129,0.15);  color: #10b981; }
+.rp-stat-icon.days   { background: rgba(245,158,11,0.15);  color: #fbbf24; }
+
+.rp-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--app-text);
+  line-height: 1;
+}
+
+.rp-stat-label {
+  font-size: 0.8rem;
+  color: var(--app-text-muted);
+  margin-top: 0.25rem;
+}
+
+/* ── Section ── */
+.rp-section {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 0.75rem;
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.rp-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--app-text);
+  margin-bottom: 1.5rem;
+}
+
+/* ── Calendar ── */
+.rp-calendar {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 0.5rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.rp-month-labels {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  gap: 1px;
+}
+
+.rp-month-label {
+  flex: 1;
+  min-width: 10px;
+  font-size: 0.7rem;
+  color: var(--app-text-muted);
+  text-align: left;
+}
+
+.rp-day-labels {
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 0.5rem;
+}
+
+.rp-day-label {
+  height: 10px;
+  font-size: 0.65rem;
+  color: var(--app-text-muted);
+  display: flex;
+  align-items: center;
+}
+
+.rp-grid {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  gap: 2px;
+}
+
+.rp-week {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rp-cell {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  transition: all 0.15s;
+}
+
+.rp-cell:hover {
+  outline: 1px solid var(--app-text-muted);
+  transform: scale(1.3);
+  z-index: 10;
+}
+
+/* ── Legend ── */
+.rp-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.rp-legend-label {
+  font-size: 0.72rem;
+  color: var(--app-text-muted);
+}
+
+.rp-legend-box {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+/* ── Chart ── */
+.rp-chart-container {
+  width: 100%;
+  height: 220px;
+  background: var(--app-card);
+  border: 1px solid var(--app-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.rp-chart {
+  width: 100%;
+  height: 100%;
+}
