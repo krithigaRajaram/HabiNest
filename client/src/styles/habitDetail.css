@@ -148,13 +148,14 @@
   margin-bottom: 1.5rem;
 }
 
-/* ── GitHub-style Calendar ── */
 .hd-calendar {
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-rows: auto 1fr;
   gap: 0.5rem;
-  overflow-x: auto;
+  justify-items: center;
+  max-width: fit-content;
+  margin: 0 auto;  
 }
 
 /* Month labels (top row) */
@@ -162,12 +163,13 @@
   grid-column: 2;
   grid-row: 1;
   display: flex;
-  gap: 1px;
+  gap: 3px;
 }
 
 .hd-month-label {
-  flex: 1;
-  min-width: 10px;
+  width: 12px;
+  min-width: 12px;
+  flex-shrink: 0;
   font-size: 0.7rem;
   color: var(--app-text-muted);
   text-align: left;
@@ -179,12 +181,12 @@
   grid-row: 2;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   padding-right: 0.5rem;
 }
 
 .hd-day-label {
-  height: 10px;
+  height: 14px;
   font-size: 0.65rem;
   color: var(--app-text-muted);
   display: flex;
@@ -196,18 +198,18 @@
   grid-column: 2;
   grid-row: 2;
   display: flex;
-  gap: 2px;
+  gap: 3px;
 }
 
 .hd-week {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .hd-cell {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 2px;
   background: var(--app-border);
   transition: all 0.15s;

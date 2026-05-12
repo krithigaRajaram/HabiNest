@@ -7,6 +7,14 @@ import '../styles/reports.css';
 const DAYS_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
+// Helper: convert Date to YYYY-MM-DD in LOCAL timezone
+const toLocalDateStr = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
 const Reports = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,15 +22,15 @@ const Reports = () => {
   useEffect(() => {
     (async () => {
       try {
-        // Fetch last 365 days of data
+        // Fetch last 365 days of data using LOCAL dates
         const end = new Date();
         const start = new Date();
         start.setDate(start.getDate() - 364);
 
         const res = await axiosInstance.get('/habit-status/reports/overview', {
           params: {
-            startDate: start.toISOString().split('T')[0],
-            endDate: end.toISOString().split('T')[0],
+            startDate: toLocalDateStr(start),
+            endDate: toLocalDateStr(end),
           }
         });
 
@@ -56,25 +64,22 @@ const Reports = () => {
     );
   }
 
-  // Helper: get YYYY-MM-DD in local timezone
-  const toLocalDateStr = (date) => {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-  };
-
-  // Group statuses by date (convert from UTC to local)
+  // Group statuses by LOCAL date (convert backend UTC dates to local)
   const statusByDate = {};
   data.statuses.forEach((s) => {
+    // Backend returns UTC date strings like "2026-04-26T00:00:00.000Z"
+    // Convert to local date
     const utcDate = new Date(s.date);
-    const dateStr = toLocalDateStr(utcDate);
-    if (!statusByDate[dateStr]) statusByDate[dateStr] = { total: 0, completed: 0 };
-    statusByDate[dateStr].total++;
-    if (s.completed) statusByDate[dateStr].completed++;
+    const localDateStr = toLocalDateStr(utcDate);
+    
+    if (!statusByDate[localDateStr]) {
+      statusByDate[localDateStr] = { total: 0, completed: 0 };
+    }
+    statusByDate[localDateStr].total++;
+    if (s.completed) statusByDate[localDateStr].completed++;
   });
 
-  // Build 52-week grid
+  // Build 52-week grid using LOCAL dates
   const today = new Date();
   const grid = [];
   for (let i = 363; i >= 0; i--) {
@@ -97,21 +102,12 @@ const Reports = () => {
   const totalPossible = data.statuses.length;
   const overallRate = totalPossible ? Math.round((totalCompletions / totalPossible) * 100) : 0;
 
-  // Best day (highest %)
-  let bestDay = { date: null, pct: 0 };
-  Object.entries(statusByDate).forEach(([dateStr, d]) => {
-    const pct = Math.round((d.completed / d.total) * 100);
-    if (pct > bestDay.pct) {
-      bestDay = { date: dateStr, pct };
-    }
-  });
-
   // Build 30-day trend data for line chart
   const trendData = [];
   for (let i = 29; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().split('T')[0];
+    const dateStr = toLocalDateStr(d);
     const dayData = statusByDate[dateStr];
     const pct = dayData ? Math.round((dayData.completed / dayData.total) * 100) : 0;
     trendData.push({ date: d, dateStr, pct });
