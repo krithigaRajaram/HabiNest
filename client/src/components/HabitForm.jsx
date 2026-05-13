@@ -7,6 +7,50 @@ const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Satur
 
 const init = { title: '', description: '', frequency: 'Daily', scheduledDay: '', scheduledDate: '' };
 
+// Days that don't exist in every month
+const DATE_WARNINGS = {
+  29: { type: 'info', message: 'Feb 29 only exists on leap years — you won\'t be notified in non-leap years.' },
+  30: { type: 'info', message: 'February has only 28–29 days — you won\'t be notified in February.' },
+  31: { type: 'info', message: 'Only Jan, Mar, May, Jul, Aug, Oct & Dec have 31 days — other months will be skipped.' },
+};
+
+const MonthCalendar = ({ value, onChange }) => {
+  const days = Array.from({ length: 31 }, (_, i) => i + 1);
+  const selected = value ? Number(value) : null;
+
+  return (
+    <div className="hf-calendar">
+      <div className="hf-calendar-grid">
+        {days.map((day) => {
+          const warn = DATE_WARNINGS[day];
+          return (
+            <button
+              key={day}
+              type="button"
+              className={[
+                'hf-cal-day',
+                selected === day ? 'hf-cal-day--selected' : '',
+                warn?.type === 'info' ? 'hf-cal-day--warn' : '',
+              ].join(' ')}
+              onClick={() => onChange(String(day))}
+              title={warn?.message || ''}
+            >
+              {day}
+            </button>
+          );
+        })}
+      </div>
+
+      {selected && DATE_WARNINGS[selected] && (
+        <div className="hf-cal-notice">
+          <span className="hf-cal-notice-icon">ℹ️</span>
+          {DATE_WARNINGS[selected].message}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const HabitForm = ({ onHabitAdded }) => {
   const [form, setForm] = useState(init);
 
@@ -21,7 +65,7 @@ const HabitForm = ({ onHabitAdded }) => {
     if (form.frequency === 'Monthly') {
       const d = Number(form.scheduledDate);
       if (!d || d < 1 || d > 31)
-        return toast.error('Please enter a valid date (1–31)');
+        return toast.error('Please select a day from the calendar');
     }
 
     const payload = {
@@ -105,16 +149,15 @@ const HabitForm = ({ onHabitAdded }) => {
 
       {form.frequency === 'Monthly' && (
         <div className="hf-field">
-          <label className="hf-label">Day of the Month</label>
-          <input
-            className="hf-input"
-            name="scheduledDate"
-            type="number"
-            min="1"
-            max="31"
+          <label className="hf-label">
+            Day of the Month
+            {form.scheduledDate && (
+              <span className="hf-optional"> — {form.scheduledDate}{getOrdinal(Number(form.scheduledDate))}</span>
+            )}
+          </label>
+          <MonthCalendar
             value={form.scheduledDate}
-            onChange={handleChange}
-            placeholder="1 – 31"
+            onChange={(val) => set('scheduledDate', val)}
           />
         </div>
       )}
@@ -125,5 +168,15 @@ const HabitForm = ({ onHabitAdded }) => {
     </div>
   );
 };
+
+function getOrdinal(n) {
+  if (n >= 11 && n <= 13) return 'th';
+  switch (n % 10) {
+    case 1: return 'st';
+    case 2: return 'nd';
+    case 3: return 'rd';
+    default: return 'th';
+  }
+}
 
 export default HabitForm;

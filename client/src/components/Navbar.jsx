@@ -36,7 +36,7 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-inner">
-        <span className="navbar-brand">HabiNest</span>
+        <span className="navbar-brand" onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>HabiNest</span>
 
         <div className="navbar-center">
           <button
